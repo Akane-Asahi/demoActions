@@ -1,21 +1,35 @@
-name: Label issues
+name: Label Trigger
+
 on:
-  issues:
-    types:
-      - reopened
-      - opened
+  push:
+    branches:
+      - main # Change this to the branch you want to monitor
+
 jobs:
-  label_issues:
+  check-labels:
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
     steps:
-      - uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ["triage"]
-            })
+      - name: Check for Labels
+        id: label-check
+        run: |
+          containsLabel=false
+          for commit in $(git log --format="%s" ${{ github.event.before }}..${{ github.sha }}); do
+            if [[ $commit == *"[Prince]"* ]]; then
+              containsLabel=true
+              break
+            fi
+          done
+
+          echo "::set-output name=containsLabel::$containsLabel"
+
+      - name: Perform Actions Based on Labels
+        run: |
+          if [[ "${{ steps.label-check.outputs.containsLabel }}" == "true" ]]; then
+            # Add your actions here
+            echo "Label 'Prince' found in commit messages. Perform actions..."
+          else
+            echo "Label 'Prince' not found in commit messages. No actions needed."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
