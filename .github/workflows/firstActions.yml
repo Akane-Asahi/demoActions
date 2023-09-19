@@ -33,4 +33,3 @@ jobs:
         env:
             MY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
-##############
