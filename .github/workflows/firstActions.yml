@@ -1,35 +1,65 @@
-name: Label Trigger
+# name: Label Trigger
+
+# on:
+#   push:
+#     branches:
+#       - main # Change this to the branch you want to monitor
+
+# jobs:
+#   check-labels:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Check for Labels
+#         id: label-check
+#         run: |
+#           containsLabel=false
+#           for commit in $(git log --format="%s" ${{ github.event.before }}..${{ github.sha }}); do
+#             if [[ $commit == *"[prince]"* ]]; then
+#               containsLabel=true
+#               break
+#             fi
+#           done
+
+#           echo "::set-output name=containsLabel::$containsLabel"
+
+#       - name: Perform Actions Based on Labels
+#         run: |
+#           if [[ "${{ steps.label-check.outputs.containsLabel }}" == "true" ]]; then
+#             # Add your actions here
+#             echo "Label 'prince' found in commit messages. Perform actions..."
+#           else
+#             echo "Label 'prince' not found in commit messages. No actions needed."
+#           fi
+#         env:
+#             MY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         continue-on-error: true
+
+
+
+
+name: Issue labels
 
 on:
-  push:
-    branches:
-      - main # Change this to the branch you want to monitor
+  issues:
+    types: [opened, reopened, labeled]
 
 jobs:
-  check-labels:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check for Labels
-        id: label-check
+      - name: Get labels
         run: |
-          containsLabel=false
-          for commit in $(git log --format="%s" ${{ github.event.before }}..${{ github.sha }}); do
-            if [[ $commit == *"[prince]"* ]]; then
-              containsLabel=true
-              break
+          labels=$(gh issue label --issue ${{github.issue.number}})
+
+      - name: Perform action based on labels
+        run: |
+          for label in $labels; do
+            if [[ $label == "prince" ]]; then
+              echo "prince action executed"
+            elif [[ $label == "bug" ]]; then
+              echo "bugs action executed"
+            else
+              echo "Unknown label: $label"
             fi
           done
-
-          echo "::set-output name=containsLabel::$containsLabel"
-
-      - name: Perform Actions Based on Labels
-        run: |
-          if [[ "${{ steps.label-check.outputs.containsLabel }}" == "true" ]]; then
-            # Add your actions here
-            echo "Label 'prince' found in commit messages. Perform actions..."
-          else
-            echo "Label 'prince' not found in commit messages. No actions needed."
-          fi
-        env:
-            MY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
