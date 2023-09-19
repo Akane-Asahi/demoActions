@@ -31,5 +31,5 @@ jobs:
             echo "Label 'prince' not found in commit messages. No actions needed."
           fi
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            MY_TOKEN: ${{ secrets.MY_TOKEN }}
         continue-on-error: true
